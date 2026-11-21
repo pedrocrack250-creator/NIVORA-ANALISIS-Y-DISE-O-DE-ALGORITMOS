@@ -6,7 +6,16 @@ from repositories.exercise_repository import ExerciseRepository
 from repositories.progress_repository import ProgressRepository
 from services.algoritmos import catalogo
 from services.algoritmos.backtracking import conflicto_reina, resolver_reinas
-from services.algoritmos.merge_sort import CRITERIOS, ordenar_ejercicios
+from services.algoritmos.merge_sort import (
+    ARREGLO_EJEMPLO,
+    CRITERIOS,
+    TAMANO_MAXIMO,
+    _combinar,
+    _dividir,
+    ordenar_ejercicios,
+    rastro_merge_sort,
+    validar_arreglo,
+)
 from services.algoritmos.voraz import pendientes, prioridad, recomendar_siguiente
 from services.algoritmos.programacion_dinamica import (
     N_MAXIMO,
@@ -47,13 +56,27 @@ def ejercicios_ordenados():
     ]
     resultado = ordenar_ejercicios(ejercicios, criterio)
 
+    # Visualización paso a paso con el arreglo que elija el estudiante.
+    error = None
+    estado = 200
+    texto = request.args.get('arreglo')
+    try:
+        numeros = validar_arreglo(texto) if texto is not None else list(ARREGLO_EJEMPLO)
+    except ValueError as exc:
+        error, numeros, estado = str(exc), list(ARREGLO_EJEMPLO), 400
+
     return render_template(
         'laboratorio/ejercicios.html',
         ejercicios=resultado.elementos,
         resultado=resultado,
         criterio=criterio,
         criterios=[(clave, nombre) for clave, (nombre, _) in CRITERIOS.items()],
-    )
+        r=rastro_merge_sort(numeros),
+        arreglo_texto=texto if error else ', '.join(str(n) for n in numeros),
+        tamano_maximo=TAMANO_MAXIMO,
+        error=error,
+        codigo=inspect.getsource(_dividir) + '\n\n' + inspect.getsource(_combinar),
+    ), estado
 
 
 @laboratorio_bp.route('/aprender/laboratorio/programacion-dinamica')

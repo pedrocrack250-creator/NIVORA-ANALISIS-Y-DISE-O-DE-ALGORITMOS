@@ -1,59 +1,166 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<section class="container lab-page">
+<section class="container lab-page lesson-page">
     <p class="eyebrow"><a href="{{ url_for('aprender.mostrar_aprender', _anchor='laboratorio') }}">Laboratorio</a> · Merge Sort</p>
-    <h1>Ejercicios disponibles</h1>
+    <h1>Merge Sort: divide, ordena y combina</h1>
     <p class="lesson-intro">
-        Esta lista se ordena en el servidor con <strong>Merge Sort</strong>, un algoritmo de
-        divide y vencerás: parte la lista por la mitad, ordena cada parte y las combina.
+        Ordenar una lista larga es difícil, pero ordenar una lista de un solo elemento es trivial:
+        ¡ya está ordenada! <strong>Merge Sort</strong> aprovecha esa idea. Parte la lista en mitades
+        cada vez más pequeñas y después las vuelve a unir, siempre en orden.
     </p>
 
-    <nav class="lab-tabs" aria-label="Criterio de orden">
-        <span>Ordenar por:</span>
-        {% for clave, nombre in criterios %}
-            <a href="{{ url_for('laboratorio.ejercicios_ordenados', orden=clave) }}"
-               class="{{ 'is-active' if clave == criterio else '' }}">{{ nombre }}</a>
-        {% endfor %}
-    </nav>
-
-    <section class="recommendation-panel">
-        <p class="eyebrow">Merge Sort en ejecución</p>
-        <p><strong>{{ ejercicios|length }}</strong> ejercicios ·
-           <strong>{{ resultado.comparaciones }}</strong> comparaciones ·
-           <strong>{{ resultado.profundidad_maxima }}</strong> niveles de recursión ·
-           <strong>{{ resultado.fusiones|length }}</strong> fusiones</p>
-        <p>Complejidad: tiempo O(n log n), espacio auxiliar O(n).</p>
+    <section class="lesson-section">
+        <h2>Cómo funciona</h2>
+        <ol class="msort-fases">
+            <li><strong>Dividir.</strong> Parte la lista por la mitad. Repite lo mismo con cada mitad
+                hasta que todas las partes tengan un solo elemento.</li>
+            <li><strong>Caso base.</strong> Una parte con un solo elemento ya está ordenada; no hay nada que hacer.</li>
+            <li><strong>Combinar.</strong> Une dos partes ordenadas mirando solo el <em>primer</em> elemento
+                de cada una: el menor pasa al resultado. Repite hasta vaciar ambas partes.</li>
+            <li>Al combinar todas las parejas, de abajo hacia arriba, se obtiene la lista completa ordenada.</li>
+        </ol>
+        <p class="lab-concept-note">
+            <strong>Piénsalo así:</strong> si tienes dos montones de cartas ya ordenados boca arriba,
+            para unirlos solo necesitas comparar las dos cartas de arriba y tomar la menor, una y otra vez.
+        </p>
     </section>
 
-    <div class="lesson-list">
-        {% for ejercicio in ejercicios %}
-            <div class="lesson-row">
-                <span class="lesson-number">{{ '%02d'|format(loop.index) }}</span>
-                <div class="lesson-row-copy">
-                    <h2>{{ ejercicio.titulo }}</h2>
-                    <p>{{ ejercicio.descripcion }}</p>
-                    <p class="exercise-meta">{{ ejercicio.unidad }} · ejercicio #{{ ejercicio.id_ejercicio }} · posición original {{ ejercicio.orden_original }}</p>
-                </div>
-                <span class="difficulty-badge difficulty-{{ ejercicio.dificultad }}">{{ ejercicio.dificultad|capitalize }}</span>
+    <form method="get" class="lab-form">
+        <label for="arreglo">Escribe de 2 a {{ tamano_maximo }} números separados por comas</label>
+        <input type="text" id="arreglo" name="arreglo" value="{{ arreglo_texto }}" required
+               inputmode="numeric" autocomplete="off">
+        <input type="hidden" name="orden" value="{{ criterio }}">
+        <button type="submit" class="btn-yellow">Ordenar</button>
+        <span class="lab-quick">
+            Prueba:
+            {% for ejemplo in ('5, 2, 4, 1', '8, 3, 5, 3, 1', '9, 8, 7, 6, 5, 4, 3, 2') %}
+                <a href="{{ url_for('laboratorio.ejercicios_ordenados', arreglo=ejemplo, orden=criterio) }}">{{ ejemplo }}</a>
+            {% endfor %}
+        </span>
+    </form>
+    {% if error %}<p class="answer-result answer-wrong" role="alert">{{ error }} Se muestra el ejemplo inicial.</p>{% endif %}
+
+    <div class="msort-layout">
+        <div>
+            <div id="msort-arbol" class="msort-arbol" role="img"
+                 aria-label="Divisiones y combinaciones de Merge Sort, un nivel por fila"></div>
+            <noscript><p>Activa JavaScript para ver la animación. La lista de pasos de abajo muestra el mismo proceso.</p></noscript>
+        </div>
+
+        <div class="reinas-panel msort-panel">
+            <p id="msort-fase" class="eyebrow msort-fase"></p>
+            <p id="msort-mensaje" class="reinas-mensaje" aria-live="polite"></p>
+            <p class="exercise-meta">Paso <span id="msort-paso"></span> · Comparaciones: <strong id="msort-comparaciones">0</strong></p>
+            <div class="reinas-controles">
+                <button type="button" id="msort-anterior" class="btn-secondary">Anterior</button>
+                <button type="button" id="msort-siguiente" class="btn-yellow">Siguiente</button>
+                <button type="button" id="msort-reproducir" class="btn-secondary">Reproducir</button>
+                <button type="button" id="msort-final" class="btn-secondary">Ir al final</button>
+                <button type="button" id="msort-reiniciar" class="btn-secondary">Reiniciar</button>
             </div>
-        {% else %}
-            <p class="lesson-intro">Todavía no hay ejercicios disponibles.</p>
-        {% endfor %}
+            <ul class="reinas-leyenda">
+                <li><span class="muestra msort-m-pendiente"></span> parte sin ordenar</li>
+                <li><span class="muestra msort-m-comparado"></span> elementos comparados</li>
+                <li><span class="muestra msort-m-elegido"></span> el menor, pasa al resultado</li>
+                <li><span class="muestra msort-m-ordenado"></span> parte ya ordenada</li>
+            </ul>
+        </div>
     </div>
 
+    <section class="recommendation-panel">
+        <p class="eyebrow">Resultado del algoritmo</p>
+        <h2>[{{ r.arreglo|join(', ') }}] → [{{ r.ordenado|join(', ') }}]</h2>
+        <p>
+            <strong>{{ r.comparaciones }}</strong> comparaciones ·
+            <strong>{{ r.niveles }}</strong> niveles de división ·
+            <strong>{{ r.eventos|length }}</strong> pasos.
+            Cada nivel recorre la lista una vez al combinar y hay unos log₂(n) niveles:
+            por eso el tiempo es O(n log n).
+        </p>
+    </section>
+
     <details class="lab-trace">
-        <summary>Ver las {{ resultado.fusiones|length }} fusiones realizadas</summary>
+        <summary>Ver todos los pasos ({{ r.eventos|length }})</summary>
         <ol>
-            {% for fusion in resultado.fusiones %}
-                <li>Nivel {{ fusion.nivel }}:
-                    <code>[{{ fusion.izquierda|join(', ') }}]</code> +
-                    <code>[{{ fusion.derecha|join(', ') }}]</code> →
-                    <code>[{{ fusion.resultado|join(', ') }}]</code></li>
+            {% for evento in r.eventos %}
+                <li class="{{ 'is-reused' if evento.accion in ('dividir', 'base') else '' }}">{{ evento.mensaje }}</li>
             {% endfor %}
         </ol>
     </details>
 
+    <section class="lesson-section">
+        <h2>Conceptos</h2>
+        <p>
+            <strong>Divide y vencerás:</strong> resolver un problema grande partiéndolo en problemas pequeños del mismo tipo.
+            <strong>Recursividad:</strong> la función se llama a sí misma con cada mitad.
+            <strong>Caso base:</strong> una lista de 0 o 1 elementos ya está ordenada.
+            <strong>Estabilidad:</strong> ante valores iguales se toma primero el de la izquierda, así se conserva su orden original.
+            <strong>Complejidad:</strong> tiempo O(n log n) en todos los casos y espacio auxiliar O(n).
+        </p>
+    </section>
+
+    <section class="lesson-section">
+        <h2>Código que se ejecutó</h2>
+        <pre><code>{{ codigo }}</code></pre>
+    </section>
+
+    <section class="lesson-section">
+        <h2>Merge Sort en Nivora: ejercicios disponibles</h2>
+        <p>
+            Nivora usa este mismo algoritmo en el servidor para ordenar sus ejercicios de práctica.
+            Cambia el criterio y observa cómo varía el orden.
+        </p>
+
+        <nav class="lab-tabs" aria-label="Criterio de orden">
+            <span>Ordenar por:</span>
+            {% for clave, nombre in criterios %}
+                <a href="{{ url_for('laboratorio.ejercicios_ordenados', orden=clave) }}"
+                   class="{{ 'is-active' if clave == criterio else '' }}">{{ nombre }}</a>
+            {% endfor %}
+        </nav>
+
+        <section class="recommendation-panel">
+            <p class="eyebrow">Merge Sort en ejecución</p>
+            <p><strong>{{ ejercicios|length }}</strong> ejercicios ·
+               <strong>{{ resultado.comparaciones }}</strong> comparaciones ·
+               <strong>{{ resultado.profundidad_maxima }}</strong> niveles de recursión ·
+               <strong>{{ resultado.fusiones|length }}</strong> fusiones</p>
+            <p>Complejidad: tiempo O(n log n), espacio auxiliar O(n).</p>
+        </section>
+
+        <div class="lesson-list">
+            {% for ejercicio in ejercicios %}
+                <div class="lesson-row">
+                    <span class="lesson-number">{{ '%02d'|format(loop.index) }}</span>
+                    <div class="lesson-row-copy">
+                        <h2>{{ ejercicio.titulo }}</h2>
+                        <p>{{ ejercicio.descripcion }}</p>
+                        <p class="exercise-meta">{{ ejercicio.unidad }} · ejercicio #{{ ejercicio.id_ejercicio }} · posición original {{ ejercicio.orden_original }}</p>
+                    </div>
+                    <span class="difficulty-badge difficulty-{{ ejercicio.dificultad }}">{{ ejercicio.dificultad|capitalize }}</span>
+                </div>
+            {% else %}
+                <p class="lesson-intro">Todavía no hay ejercicios disponibles.</p>
+            {% endfor %}
+        </div>
+
+        <details class="lab-trace">
+            <summary>Ver las {{ resultado.fusiones|length }} fusiones realizadas</summary>
+            <ol>
+                {% for fusion in resultado.fusiones %}
+                    <li>Nivel {{ fusion.nivel }}:
+                        <code>[{{ fusion.izquierda|join(', ') }}]</code> +
+                        <code>[{{ fusion.derecha|join(', ') }}]</code> →
+                        <code>[{{ fusion.resultado|join(', ') }}]</code></li>
+                {% endfor %}
+            </ol>
+        </details>
+    </section>
+
     <a href="{{ url_for('aprender.mostrar_aprender', _anchor='laboratorio') }}" class="text-link">Volver al laboratorio</a>
 </section>
+
+<script type="application/json" id="msort-datos">{{ {'n': r.arreglo|length, 'niveles': r.niveles, 'eventos': r.eventos}|tojson }}</script>
+<script src="{{ url_for('static', filename='js/laboratorio/merge_sort.js') }}"></script>
 {% endblock %}

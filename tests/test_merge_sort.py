@@ -170,3 +170,73 @@ def test_aprender_enlaza_a_ejercicios_y_la_url_antigua_redirige(cliente):
     antigua = cliente.get("/practica/ejercicios?orden=posicion")
     assert antigua.status_code == 301
     assert antigua.headers["Location"].endswith("/aprender/laboratorio/merge-sort?orden=posicion")
+
+
+# --- Visualización paso a paso ----------------------------------------------
+
+import json
+import re
+
+from services.algoritmos.merge_sort import rastro_merge_sort, validar_arreglo
+
+
+def test_rastro_coincide_con_merge_sort():
+    for numeros in ([38, 27, 43, 3, 9, 82, 10], [5, 2, 4, 1], [8, 3, 5, 3, 1], [2, 1]):
+        rastro = rastro_merge_sort(numeros)
+        esperado = merge_sort(numeros)
+        assert rastro["ordenado"] == esperado.elementos == sorted(numeros)
+        assert rastro["comparaciones"] == esperado.comparaciones
+        assert rastro["eventos"][-1]["comparaciones"] == esperado.comparaciones
+
+
+def test_rastro_muestra_dividir_caso_base_y_combinar_en_orden():
+    eventos = rastro_merge_sort([5, 2, 4, 1])["eventos"]
+    acciones = [evento["accion"] for evento in eventos]
+    assert acciones[0] == "inicio" and acciones[-1] == "fin"
+    assert acciones[1:4] == ["dividir", "dividir", "base"]
+    assert acciones.count("dividir") == 3 and acciones.count("base") == 4
+    assert "comparar" in acciones and "combinado" in acciones
+    # cada nodo ocupa exactamente el tramo del arreglo del que salió
+    final = eventos[-1]["nodos"]
+    assert final[0]["valores"] == [1, 2, 4, 5] and final[0]["estado"] == "ordenado"
+    for nodo in final:
+        assert nodo["fin"] - nodo["inicio"] == len(nodo["valores"])
+
+
+def test_rastro_explica_cada_comparacion():
+    eventos = rastro_merge_sort([3, 1])["eventos"]
+    comparacion = next(e for e in eventos if e["accion"] == "comparar")
+    assert comparacion["mensaje"] == "Comparamos 3 y 1: 1 es menor, así que 1 pasa al resultado."
+    assert {m["tipo"] for m in comparacion["marcas"]} == {"comparado", "elegido", "nuevo"}
+
+
+@pytest.mark.parametrize("texto", ["1", "a, b", "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11", "1, 5000"])
+def test_validar_arreglo_rechaza_entradas_invalidas(texto):
+    with pytest.raises(ValueError):
+        validar_arreglo(texto)
+
+
+def test_validar_arreglo_acepta_comas_y_espacios():
+    assert validar_arreglo("5, 2  -3,7") == [5, 2, -3, 7]
+
+
+def test_pagina_incluye_la_visualizacion_paso_a_paso(cliente):
+    iniciar_sesion(cliente)
+    html = cliente.get("/aprender/laboratorio/merge-sort?arreglo=5,2,4,1").get_data(as_text=True)
+    assert 'id="msort-arbol"' in html
+    assert "js/laboratorio/merge_sort.js" in html
+    assert "Cómo funciona" in html and "def _combinar" in html
+    datos = json.loads(re.search(r'id="msort-datos">(.*?)</script>', html, re.S).group(1))
+    assert datos["n"] == 4
+    assert datos["eventos"] == rastro_merge_sort([5, 2, 4, 1])["eventos"]
+    assert "[5, 2, 4, 1] → [1, 2, 4, 5]" in html
+    assert cliente.get("/static/js/laboratorio/merge_sort.js").status_code == 200
+
+
+def test_pagina_rechaza_arreglo_invalido_sin_romperse(cliente):
+    iniciar_sesion(cliente)
+    respuesta = cliente.get("/aprender/laboratorio/merge-sort?arreglo=hola")
+    html = respuesta.get_data(as_text=True)
+    assert respuesta.status_code == 400
+    assert "números enteros" in html
+    assert "[3, 9, 10, 27, 38, 43, 82]" in html  # se muestra el ejemplo inicial

@@ -157,3 +157,16 @@ def test_next_lesson_skips_completed_lesson():
 
     assert response.status_code == 200
     assert b"/aprender/leccion/repaso_fundamentos" in response.data
+
+def test_ajustes_no_ofrece_cambiar_contrasena():
+    client = create_app(TestingConfig).test_client()
+    with client.session_transaction() as session:
+        session["usuario"] = {"id_persona": 1, "nombre": "Ana", "email": "ana@example.com"}
+
+    response = client.get("/ajustes")
+    html = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    assert "Ana" in html and "ana@example.com" in html
+    assert "Cambiar contraseña" not in html
+    assert "Seguridad" not in html
