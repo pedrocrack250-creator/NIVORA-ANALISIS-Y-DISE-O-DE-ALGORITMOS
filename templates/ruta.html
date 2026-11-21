@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="container route-page">
+    <p class="eyebrow">Unidad {{ unidad.id }} · {{ unidad.progreso }} completadas</p>
+    <h1>{{ unidad.nombre }}</h1>
+    <p class="lesson-intro">Completa las lecciones en orden. Cada quiz aprobado desbloquea el siguiente.</p>
+
+    <div class="lesson-list">
+        {% for lesson in lecciones %}
+            <div class="lesson-row {{ 'is-complete' if lesson.completada else '' }} {{ 'is-locked' if not lesson.desbloqueada else '' }}">
+                <span class="lesson-number">{{ '%02d'|format(lesson.posicion) }}</span>
+                <div class="lesson-row-copy">
+                    <h2>{{ lesson.titulo }}</h2>
+                    <p>{{ lesson.descripcion }}</p>
+                </div>
+                {% if lesson.completada %}
+                    <span class="lesson-status">Completada</span>
+                {% elif lesson.desbloqueada %}
+                    <div class="lesson-actions">
+                        {% if lesson.intentada %}<span class="lesson-status lesson-incomplete">Incompleta</span>{% endif %}
+                        <a class="btn-continuar-sm" href="{{ url_for('aprender.leccion', lesson_id=lesson.id) }}">{% if lesson.intentada %}Repetir quiz{% else %}Comenzar lección{% endif %}</a>
+                    </div>
+                {% else %}
+                    <span class="lesson-status">Bloqueada</span>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <a href="{{ url_for('aprender.mostrar_aprender') }}" class="text-link">Volver a unidades</a>
+</section>
+{% endblock %}

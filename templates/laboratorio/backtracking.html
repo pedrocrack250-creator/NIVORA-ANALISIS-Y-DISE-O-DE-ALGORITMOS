@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="container lab-page lesson-page">
+    <p class="eyebrow">Laboratorio · Backtracking</p>
+    <h1>Las 4 reinas</h1>
+    <p class="lesson-intro">
+        Coloca 4 reinas en un tablero de 4 × 4 para que ninguna ataque a otra:
+        no pueden compartir columna ni diagonal. El algoritmo prueba, comprueba, avanza y,
+        cuando se queda sin salida, <strong>retrocede</strong>.
+    </p>
+
+    <section class="lesson-section">
+        <h2>Cómo decide</h2>
+        <ol>
+            <li>Va fila por fila y prueba las columnas de izquierda a derecha.</li>
+            <li>Si la posición es segura, coloca la reina y pasa a la fila siguiente.</li>
+            <li>Si hay conflicto, descarta esa posición (<em>poda</em>) sin explorar lo que vendría después.</li>
+            <li>Si ninguna columna sirve, retrocede: retira la reina anterior y prueba otra columna.</li>
+            <li>Cuando llega a la fila 5 (caso base), las 4 reinas están bien ubicadas.</li>
+        </ol>
+    </section>
+
+    <nav class="lab-tabs" aria-label="Solución a mostrar">
+        <span>Ver:</span>
+        {% for numero in (1, 2) %}
+            <a href="{{ url_for('laboratorio.laboratorio_backtracking', solucion=numero) }}"
+               class="{{ 'is-active' if numero == r.numero_solucion else '' }}">Solución {{ numero }}</a>
+        {% endfor %}
+    </nav>
+    {% if error %}<p class="answer-result answer-wrong" role="alert">{{ error }}</p>{% endif %}
+
+    <div class="reinas-layout">
+        <div>
+            <div id="tablero" class="tablero" role="img" aria-label="Tablero de ajedrez de 4 por 4"></div>
+            <noscript><p>Activa JavaScript para ver el tablero. La lista de pasos de abajo muestra el mismo proceso.</p></noscript>
+        </div>
+
+        <div class="reinas-panel">
+            <p id="reinas-mensaje" class="reinas-mensaje" aria-live="polite"></p>
+            <p class="exercise-meta">Paso <span id="reinas-paso"></span></p>
+            <div class="reinas-controles">
+                <button type="button" id="reinas-anterior" class="btn-secondary">Anterior</button>
+                <button type="button" id="reinas-siguiente" class="btn-yellow">Siguiente</button>
+                <button type="button" id="reinas-reproducir" class="btn-secondary">Reproducir</button>
+                <button type="button" id="reinas-final" class="btn-secondary">Ir al final</button>
+                <button type="button" id="reinas-reiniciar" class="btn-secondary">Reiniciar</button>
+            </div>
+            <ul class="reinas-leyenda">
+                <li><span class="muestra intento"></span> intento</li>
+                <li><span class="muestra conflicto"></span> conflicto (poda)</li>
+                <li><span class="muestra atacante"></span> reina que ataca</li>
+                <li><span class="muestra retiro"></span> retroceso</li>
+            </ul>
+        </div>
+    </div>
+
+    <section class="recommendation-panel">
+        <p class="eyebrow">Solución {{ r.numero_solucion }} · resultado del algoritmo</p>
+        <h2>Columnas por fila: {{ (r.solucion|map('string')|list) | join(', ') if r.solucion else '—' }}</h2>
+        <p>
+            <strong id="cont-intentos">0</strong> intentos ·
+            <strong id="cont-colocaciones">0</strong> colocaciones ·
+            <strong id="cont-conflictos">0</strong> podas ·
+            <strong id="cont-retrocesos">0</strong> retrocesos
+            (los contadores avanzan con cada paso; totales: {{ r.intentos }} intentos,
+            {{ r.colocaciones }} colocaciones, {{ r.conflictos }} podas, {{ r.retrocesos }} retrocesos).
+        </p>
+        <p>
+            Sin poda habría que revisar {{ r.combinaciones_sin_poda }} tableros completos (4⁴).
+            Con backtracking se descartaron ramas enteras en cuanto apareció un conflicto.
+            Complejidad: tiempo O(N!) en el peor caso, espacio O(N).
+        </p>
+    </section>
+
+    <details class="lab-trace">
+        <summary>Ver todos los pasos ({{ r.eventos|length }})</summary>
+        <ol>
+            {% for evento in r.eventos %}
+                <li class="{{ 'is-reused' if evento.accion in ('retroceder', 'conflicto') else '' }}">{{ evento.mensaje }}</li>
+            {% endfor %}
+        </ol>
+    </details>
+
+    <section class="lesson-section">
+        <h2>Conceptos</h2>
+        <p>
+            <strong>Espacio de búsqueda:</strong> todas las formas de ubicar una reina por fila.
+            <strong>Restricciones:</strong> no compartir columna ni diagonal.
+            <strong>Poda:</strong> abandonar una rama apenas incumple una restricción.
+            <strong>Caso base:</strong> haber ubicado las 4 reinas.
+            <strong>Retroceso:</strong> deshacer la última decisión y probar otra alternativa.
+        </p>
+    </section>
+
+    <section class="lesson-section">
+        <h2>Código que se ejecutó</h2>
+        <pre><code>{{ codigo }}</code></pre>
+    </section>
+
+    <a href="{{ url_for('aprender.mostrar_aprender', _anchor='laboratorio') }}" class="text-link">Volver al laboratorio</a>
+</section>
+
+<script type="application/json" id="reinas-datos">{{ {'n': r.n, 'eventos': r.eventos}|tojson }}</script>
+<script src="{{ url_for('static', filename='js/laboratorio/backtracking.js') }}"></script>
+{% endblock %}

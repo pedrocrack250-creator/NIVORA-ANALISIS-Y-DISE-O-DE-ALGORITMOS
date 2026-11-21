@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<article class="lesson-page container">
+    <p class="eyebrow">Unidad {{ unidad.id }} · Lección {{ '%02d'|format(lesson.posicion) }} · {{ unidad.nombre }}</p>
+    <h1>{{ lesson.titulo }}</h1>
+    <p class="lesson-intro">{{ lesson.descripcion }}</p>
+
+    <section class="lesson-section">
+        <h2>Antes del quiz</h2>
+        {% if lesson.id == 'variables' %}
+            <p>Una variable guarda un valor. Python tiene tipos como <code>str</code>, <code>int</code>, <code>float</code> y <code>bool</code>.</p>
+            <pre><code>nombre = "Ana"
+edad = 20
+activo = True</code></pre>
+        {% elif lesson.id == 'operadores' %}
+            <p>Los operadores permiten calcular y comparar valores.</p>
+            <pre><code>suma = 3 + 4
+mayor = 5 &gt; 2</code></pre>
+        {% elif lesson.id == 'entrada_salida' %}
+            <p><code>print</code> muestra información y <code>input</code> recibe texto.</p>
+            <pre><code>nombre = input("Tu nombre: ")
+print(nombre)</code></pre>
+        {% elif lesson.id == 'condicionales' %}
+            <p><code>if</code> ejecuta un bloque solo cuando la condición es verdadera; <code>else</code> se ejecuta en caso contrario. La sangría indica qué instrucciones pertenecen a cada bloque.</p>
+            <pre><code>edad = 17
+if edad &gt;= 18:
+    print("Puedes votar")
+else:
+    print("Todavía no puedes votar")</code></pre>
+        {% elif lesson.id == 'elif' %}
+            <p><code>elif</code> evalúa otra condición si las anteriores fueron falsas. Solo se ejecuta el primer bloque cuya condición se cumpla. Con <code>and</code> y <code>or</code> combinas condiciones.</p>
+            <pre><code>nota = 8
+if nota &gt;= 9:
+    print("Excelente")
+elif nota &gt;= 6 and nota &lt; 9:
+    print("Aprobado")
+else:
+    print("Reprobado")</code></pre>
+        {% elif lesson.id == 'ciclo_for' %}
+            <p><code>for</code> repite un bloque para cada elemento de una secuencia. <code>range(n)</code> genera los números de <code>0</code> a <code>n - 1</code>.</p>
+            <pre><code>for i in range(3):
+    print(i)        # 0, 1, 2
+
+for fruta in ["manzana", "pera"]:
+    print(fruta)</code></pre>
+        {% elif lesson.id == 'ciclo_while' %}
+            <p><code>while</code> repite mientras su condición sea verdadera. <code>break</code> termina el ciclo y <code>continue</code> salta a la siguiente vuelta.</p>
+            <pre><code>contador = 0
+while contador &lt; 5:
+    contador += 1
+    if contador == 2:
+        continue
+    if contador == 4:
+        break
+    print(contador)  # 1, 3</code></pre>
+        {% elif lesson.id == 'listas' %}
+            <p>Una lista guarda varios valores en orden. Cada elemento tiene un índice que empieza en <code>0</code>; los índices negativos cuentan desde el final.</p>
+            <pre><code>numeros = [10, 20, 30]
+print(numeros[0])   # 10
+print(numeros[-1])  # 30</code></pre>
+        {% elif lesson.id == 'metodos_listas' %}
+            <p>Los métodos modifican la lista: <code>append</code> agrega, <code>remove</code> elimina un valor, <code>pop</code> quita el último elemento y <code>sort</code> ordena.</p>
+            <pre><code>numeros = [3, 1, 2]
+numeros.append(5)
+numeros.remove(1)
+ultimo = numeros.pop()  # 5
+numeros.sort()          # [2, 3]</code></pre>
+        {% elif lesson.id == 'tuplas' %}
+            <p>Una tupla se escribe entre paréntesis y, a diferencia de una lista, no se puede modificar después de crearla.</p>
+            <pre><code>punto = (4, 8)
+print(punto[0])  # 4
+# punto[0] = 1   -&gt; error: las tuplas son inmutables</code></pre>
+        {% elif lesson.id == 'diccionarios' %}
+            <p>Un diccionario guarda pares clave-valor entre llaves. Se accede a cada valor mediante su clave.</p>
+            <pre><code>persona = {"nombre": "Ana", "edad": 20}
+print(persona["edad"])   # 20
+print(persona.keys())    # nombre, edad</code></pre>
+        {% elif lesson.id == 'definir_funciones' %}
+            <p>Una función agrupa instrucciones con un nombre. Se define con <code>def</code>, termina la línea con <code>:</code> y se ejecuta escribiendo su nombre con paréntesis.</p>
+            <pre><code>def saludar():
+    print("¡Hola!")
+
+saludar()</code></pre>
+        {% elif lesson.id == 'parametros' %}
+            <p>Los parámetros son los nombres que recibe la función; los argumentos son los valores que envías al llamarla. Un parámetro puede tener un valor por defecto.</p>
+            <pre><code>def sumar(a, b):
+    print(a + b)
+
+def saludar(saludo="Hola"):
+    print(saludo)
+
+sumar(2, 3)   # 5
+saludar()     # Hola</code></pre>
+        {% elif lesson.id == 'retorno' %}
+            <p><code>return</code> devuelve un resultado para usarlo después. Si una función no tiene <code>return</code>, devuelve <code>None</code>.</p>
+            <pre><code>def doble(n):
+    return n * 2
+
+resultado = doble(4)  # 8</code></pre>
+        {% elif lesson.id == 'repaso_funciones' %}
+            <p>Las variables creadas dentro de una función solo existen dentro de ella. Una función también puede llamarse a sí misma: se dice que es recursiva.</p>
+            <pre><code>def factorial(n):
+    if n &lt;= 1:
+        return 1
+    return n * factorial(n - 1)
+
+print(factorial(4))  # 24</code></pre>
+        {% else %}
+            <p>Las listas agrupan valores. Puedes consultar su tamaño y agregar elementos.</p>
+            <pre><code>frutas = ["manzana"]
+frutas.append("pera")</code></pre>
+        {% endif %}
+    </section>
+
+    <section class="lesson-exercise">
+        <h2>Quiz de la lección</h2>
+        <p>Necesitas responder correctamente las 3 preguntas para completarla.</p>
+        <form method="POST" action="{{ url_for('aprender.completar_leccion', lesson_id=lesson.id) }}" class="lesson-quiz">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% for question, options in lesson.questions %}
+                <div class="quiz-question">
+                    <p>{{ loop.index }}. {{ question }}</p>
+                    {% set question_number = loop.index %}
+                    {% for value, label in options %}
+                        <label><input type="radio" name="respuesta_{{ question_number }}" value="{{ value }}" required {% if resultado and resultado.answers[question_number - 1] == value %}checked{% endif %} {% if resultado %}disabled{% endif %}> {{ label }}</label>
+                    {% endfor %}
+                    {% if resultado and resultado.results[loop.index0] %}<span class="answer-result answer-correct">Correcta</span>{% elif resultado %}<span class="answer-result answer-wrong">Incorrecta</span>{% endif %}
+                </div>
+            {% endfor %}
+            {% if resultado %}<p class="quiz-score">Resultado: {{ resultado.score }}/{{ resultado.total }}</p>{% endif %}
+            {% if not resultado %}
+                <button type="submit" class="btn-yellow">Evaluar quiz</button>
+            {% else %}
+                <p class="quiz-score">Quiz evaluado{% if not resultado.completada %}. Pulsa “Repetir quiz” para intentarlo de nuevo.{% else %}: lección completada.{% endif %}</p>
+            {% endif %}
+        </form>
+    </section>
+
+    {% if resultado %}
+        <div class="quiz-actions">
+            {% if not resultado.completada %}
+                <a href="{{ url_for('aprender.leccion', lesson_id=lesson.id) }}" class="btn-secondary">Repetir quiz</a>
+            {% endif %}
+            {% if resultado.next_lesson %}
+                <a href="{{ url_for('aprender.leccion', lesson_id=resultado.next_lesson.id) }}" class="btn-yellow">Siguiente lección</a>
+            {% else %}
+                <a href="{{ url_for('aprender.ruta', route_id=unidad.id) }}" class="btn-yellow">Ver ruta completa</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</article>
+{% endblock %}

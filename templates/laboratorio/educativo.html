@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="container lab-page">
+    <p class="eyebrow"><a href="{{ url_for('aprender.mostrar_aprender', _anchor='laboratorio') }}">Laboratorio</a> · Contenido educativo</p>
+    <h1>{{ contenido.nombre }}</h1>
+    <p class="lesson-intro">{{ contenido.descripcion }}</p>
+
+    <section class="lab-lesson-section">
+        <h2>¿Qué es?</h2>
+        <p>{{ contenido.que_es }}</p>
+        <div class="lab-concept-note"><strong>Idea clave:</strong> {{ contenido.idea }}</div>
+    </section>
+
+    <section class="lab-lesson-section">
+        <h2>¿Cómo funciona?</h2>
+        <ol class="lab-steps">
+            {% for paso in contenido.pasos %}<li>{{ paso }}</li>{% endfor %}
+        </ol>
+    </section>
+
+    {% if contenido.slug in ['kruskal', 'prim'] %}
+    <section class="lab-lesson-section">
+        <h2>Ejemplo resuelto</h2>
+        <p>Usamos un grafo no dirigido con estos vértices y conexiones ponderadas:</p>
+        <div class="lab-scroll"><table class="lab-table">
+            <thead><tr><th>Vértice inicial</th><th>Vértice final</th><th>Peso</th></tr></thead>
+            <tbody>{% for a,b,peso in grafo.aristas %}<tr><td>{{ a }}</td><td>{{ b }}</td><td>{{ peso }}</td></tr>{% endfor %}</tbody>
+        </table></div>
+        <p>El algoritmo selecciona estas conexiones:</p>
+        <div class="lab-scroll"><table class="lab-table">
+            <thead><tr><th>Arista</th><th>Decisión</th></tr></thead>
+            <tbody>{% for paso in pasos %}<tr><td>{{ paso.arista[0] }} – {{ paso.arista[1] }} ({{ paso.arista[2] }})</td><td>{{ paso.decision }}</td></tr>{% endfor %}</tbody>
+        </table></div>
+        <p class="lab-result"><strong>Costo total del árbol:</strong> {{ costo }}</p>
+        <p class="exercise-meta">El resultado se obtiene ejecutando la implementación Python del algoritmo, no mediante una lista de respuestas fija.</p>
+    </section>
+    {% else %}
+    <section class="lab-lesson-section">
+        <h2>Ejemplo resuelto</h2>
+        <p>Comenzamos con tres conjuntos separados: {A}, {B} y {C}. Al ejecutar Union(A, B), A y B quedan en el mismo conjunto. Find permite consultar su representante y comprobar la conexión.</p>
+        <ol class="lab-steps">{% for paso in pasos %}<li>{{ paso.decision }}</li>{% endfor %}</ol>
+    </section>
+    {% endif %}
+
+    <section class="lab-lesson-section">
+        <h2>Implementación en Python</h2>
+        <p>Este es el código de referencia que ejecuta el ejemplo de la página:</p>
+        <pre class="lab-code"><code>{{ codigo }}</code></pre>
+        <p class="exercise-meta">Complejidad: {{ contenido.complejidad }}</p>
+    </section>
+
+    <section class="lab-lesson-section lab-exercise">
+        <h2>Ponlo a prueba</h2>
+        <p>{{ contenido.ejercicio }}</p>
+        <details>
+            <summary>Ver respuesta explicada</summary>
+            <p>{{ contenido.respuesta }}</p>
+        </details>
+    </section>
+
+    {% if contenido.slug in ['kruskal', 'prim'] %}
+    <section class="lab-lesson-section">
+        <h2>Prim vs. Kruskal</h2>
+        <p>Ambos encuentran un árbol de expansión mínima, pero construyen la solución de manera diferente:</p>
+        <div class="lab-scroll"><table class="lab-table">
+            <thead><tr><th>Aspecto</th><th>Kruskal</th><th>Prim</th></tr></thead>
+            <tbody>{% for fila in comparacion %}<tr><td>{{ fila.aspecto }}</td><td>{{ fila.kruskal }}</td><td>{{ fila.prim }}</td></tr>{% endfor %}</tbody>
+        </table></div>
+        <p>Kruskal suele ser cómodo cuando se trabaja con una lista de aristas; Prim suele ser natural cuando se explora el grafo desde un vértice. Los dos producen un MST si el grafo es conexo y no dirigido.</p>
+    </section>
+    {% endif %}
+
+    <a href="{{ url_for('aprender.mostrar_aprender', _anchor='laboratorio') }}" class="text-link">Volver al laboratorio</a>
+</section>
+{% endblock %}

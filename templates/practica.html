@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container" style="text-align: center; padding-top: 2rem;">
+<p class="eyebrow">Pon en práctica lo aprendido</p>
+
+<h1 style="font-size: 2.5rem; margin-bottom: 1rem;">
+    Practica Python
+</h1>
+
+<p style="color: var(--text-sub); max-width: 650px; margin: 0 auto 2rem auto; line-height: 1.6;">
+    En esta sección puedes poner en práctica los conceptos que aprendiste
+    en las unidades de Nivora. Resuelve ejercicios y mejora poco a poco tu
+    forma de pensar y escribir código.
+</p>
+
+<img src="{{ url_for('static', filename='img/nivora_practica.png') }}"
+     alt="Practicar Python"
+     style="width: 260px; max-width: 70%; margin: 1rem auto 2rem; display: block;">
+
+<div style="display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 2rem;">
+
+    <div class="module-card" style="text-align: left; max-width: 320px; flex: 1;">
+        <div class="module-info">
+            <h4>Desafío Fácil</h4>
+            <p>
+                Ejercicios directos para aplicar los conceptos aprendidos
+                y practicar paso a paso.
+            </p>
+        </div>
+    </div>
+
+    <div class="module-card" style="text-align: left; max-width: 320px; flex: 1;">
+        <div class="module-info">
+            <h4>Desafío Difícil</h4>
+            <p>
+                Problemas que requieren más razonamiento y te ayudan a
+                profundizar en tus habilidades.
+            </p>
+        </div>
+    </div>
+
+</div>
+
+{% if recomendacion %}
+<section class="greedy-recommendation">
+    <p class="eyebrow">Recomendación personalizada · Algoritmo Voraz</p>
+    <h2>Tu siguiente pregunta</h2>
+    <p class="greedy-question">{{ recomendacion.pregunta }}</p>
+    <p class="greedy-meta">
+        Lección: {{ recomendacion.lesson_title }} ·
+        Intentos: {{ recomendacion.intentos }} ·
+        Respuestas incorrectas: {{ recomendacion.errores }}
+    </p>
+    <a class="btn-yellow" href="{{ url_for('aprender.leccion', lesson_id=recomendacion.lesson_id) }}">
+        Reforzar este tema
+    </a>
+    <p class="greedy-explanation">
+        Nivora prioriza las preguntas pendientes con más errores; si hay empate,
+        elige la de menor dificultad y luego la que aparece primero.
+    </p>
+</section>
+{% else %}
+<section class="greedy-recommendation">
+    <p class="eyebrow">Recomendación personalizada · Algoritmo Voraz</p>
+    <h2>¡Completaste todas las preguntas!</h2>
+    <p>Por ahora no tienes preguntas pendientes en los quizzes. Puedes volver a practicar o repasar una lección.</p>
+</section>
+{% endif %}
+
+<a href="{{ url_for('practica.ejercicios_ordenados') }}" class="btn-yellow" style="width: auto; padding: 0.8rem 3rem;">
+    Practicar
+</a>
+<a href="{{ url_for('practica.laboratorio') }}" class="btn-secondary" style="margin: 0.5rem 0 0 0.75rem;">Laboratorio de algoritmos</a>
+</div>
+{% endblock %}

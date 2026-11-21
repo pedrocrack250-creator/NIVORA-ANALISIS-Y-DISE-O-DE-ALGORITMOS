@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="home-hero">
+    <div class="hero-copy">
+        <p class="eyebrow">Aprendizaje que se mueve contigo</p>
+        <h1>Piensa en código.<br><span>Construye tu próximo nivel.</span></h1>
+        <p class="hero-description">Aprende Python con unidades cortas, práctica real y una guía que convierte cada pequeño avance en confianza.</p>
+        <div class="hero-actions">
+            <a href="{{ '/aprender' if session.get('usuario') else '/registro' }}" class="btn-yellow">{{ 'Continuar aprendiendo' if session.get('usuario') else 'Crear mi cuenta' }}</a>
+            <a href="/aprender#laboratorio" class="text-link">Explorar el laboratorio <span>&rarr;</span></a>
+        </div>
+    </div>
+    <div class="hero-visual">
+        <div class="orbit orbit-one"></div>
+        <div class="orbit orbit-two"></div>
+        <div class="code-card">
+            <div class="code-top"><span></span><span></span><span></span><b>nivora.py</b></div>
+            <pre><code><i>def</i> <strong>crear_futuro</strong>(<em>idea</em>):
+    <i>return</i> idea + <mark>"práctica"</mark>
+
+<span class="code-result">&gt;&gt;&gt; crear_futuro("tu")</span>
+<strong class="code-output">'tu práctica'</strong></code></pre>
+        </div>
+        <img src="{{ url_for('static', filename='img/nivora_inicio.png') }}" alt="Ilustración de Nivora" class="hero-character">
+    </div>
+</section>
+
+<section class="home-stats container">
+    <div><strong>3</strong><span>unidades para dominar</span></div>
+    <div><strong>100%</strong><span>práctica a tu ritmo</span></div>
+    <div><strong>0</strong><span>experiencia necesaria</span></div>
+</section>
+
+<section class="offer-section container">
+    <div class="offer-heading">
+        <p class="eyebrow">Todo lo que necesitas para avanzar</p>
+        <h2>Aprende haciendo,<br>paso a paso.</h2>
+        <p>Una experiencia pensada para que cada concepto termine convertido en algo que puedes construir.</p>
+    </div>
+    <div class="offer-grid">
+        <article class="offer-card offer-card">
+            <span class="offer-number">01</span>
+            <h3>Unidades guiadas</h3>
+            <p>Lecciones ordenadas desde los fundamentos hasta las estructuras que usarás en proyectos reales.</p>
+            <a href="/aprender" class="offer-link">Ver unidades <span>&rarr;</span></a>
+        </article>
+        <article class="offer-card">
+            <span class="offer-number">02</span>
+            <h3>Práctica con propósito</h3>
+            <p>Ejercicios breves para convertir la teoría en código y ganar soltura resolviendo problemas.</p>
+            <a href="/aprender#laboratorio" class="offer-link">Laboratorio de algoritmos <span>&rarr;</span></a>
+        </article>
+        <article class="offer-card">
+            <span class="offer-number">03</span>
+            <h3>Progreso visible</h3>
+            <p>Consulta tus avances y vuelve exactamente al punto donde dejaste tu aprendizaje.</p>
+            <a href="{{ '/progreso' if session.get('usuario') else '/registro' }}" class="offer-link">{{ 'Ver mi progreso' if session.get('usuario') else 'Empezar ahora' }} <span>&rarr;</span></a>
+        </article>
+    </div>
+</section>
+{% endblock %}
+```

@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="container lab-page lesson-page">
+    <p class="eyebrow">Laboratorio · Programación dinámica</p>
+    <h1>Escaleras: ¿de cuántas formas se sube?</h1>
+    <p class="lesson-intro">
+        Una escalera tiene <strong>n</strong> escalones y puedes subir de 1 o de 2 escalones por vez.
+        ¿De cuántas formas distintas puedes llegar arriba?
+    </p>
+
+    <section class="lesson-section">
+        <h2>Idea</h2>
+        <p>
+            Para llegar al escalón <code>n</code> vienes del <code>n-1</code> o del <code>n-2</code>, así que
+            <code>formas(n) = formas(n-1) + formas(n-2)</code>, con <code>formas(0) = formas(1) = 1</code>.
+            El problema: la recursión pura resuelve <em>los mismos subproblemas</em> una y otra vez.
+            La programación dinámica los guarda (memoización) y los reutiliza.
+        </p>
+    </section>
+
+    <form method="get" class="lab-form">
+        <label for="n">Número de escalones (0 a {{ n_maximo }})</label>
+        <input type="number" id="n" name="n" min="0" max="{{ n_maximo }}" value="{{ r.n }}" required>
+        <button type="submit" class="btn-yellow">Calcular</button>
+        <span class="lab-quick">
+            Prueba:
+            {% for ejemplo in (5, 10, 20, 25) %}
+                <a href="{{ url_for('laboratorio.laboratorio_programacion_dinamica', n=ejemplo) }}">{{ ejemplo }}</a>
+            {% endfor %}
+        </span>
+    </form>
+    {% if error %}<p class="answer-result answer-wrong" role="alert">{{ error }}</p>{% endif %}
+
+    <section class="recommendation-panel">
+        <p class="eyebrow">Resultado</p>
+        <h2>Con {{ r.n }} escalones hay {{ r.formas }} formas de subir</h2>
+        <p>Las dos soluciones se ejecutaron con el mismo valor y obtuvieron el mismo resultado.</p>
+    </section>
+
+    <div class="lab-scroll">
+        <table class="lab-table">
+            <thead>
+                <tr><th>Solución</th><th>Llamadas recursivas</th><th>Tiempo medido</th><th>Complejidad</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Recursión sin memoización</td>
+                    <td>{{ '{:,}'.format(r.llamadas_recursivo) }}</td>
+                    <td>{{ '%.2f'|format(r.tiempo_recursivo_ms) }} ms</td>
+                    <td>tiempo O(2ⁿ), espacio O(n)</td>
+                </tr>
+                <tr>
+                    <td>Con memoización</td>
+                    <td>{{ '{:,}'.format(r.llamadas_memoizado) }}</td>
+                    <td>{{ '%.2f'|format(r.tiempo_memoizado_ms) }} ms</td>
+                    <td>tiempo O(n), espacio O(n)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <p>
+        La memoización evitó <strong>{{ '{:,}'.format(r.llamadas_evitadas) }}</strong> llamadas
+        (unas {{ '%.1f'|format(r.factor_llamadas) }} veces menos) y reutilizó
+        <strong>{{ r.reutilizaciones }}</strong> resultados ya guardados.
+    </p>
+
+    <section class="lesson-section">
+        <h2>Estados guardados</h2>
+        <p>Cada fila es un subproblema <code>formas(k)</code> resuelto una sola vez. Los resaltados se reutilizaron.</p>
+        <div class="lab-scroll">
+            <table class="lab-table">
+                <thead><tr><th>Estado k</th><th>formas(k)</th><th>Veces reutilizado</th></tr></thead>
+                <tbody>
+                    {% for estado in r.estados %}
+                        <tr class="{{ 'is-reused' if estado.reutilizaciones else '' }}">
+                            <td>{{ estado.n }}</td>
+                            <td>{{ estado.valor }}</td>
+                            <td>{{ estado.reutilizaciones }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <details class="lab-trace">
+        <summary>Ver la secuencia de decisiones ({{ r.eventos|length }} pasos)</summary>
+        <ol>
+            {% for evento in r.eventos %}
+                <li class="{{ 'is-reused' if evento.accion == 'reutilizado' else '' }}">
+                    formas({{ evento.n }}) = {{ evento.valor }} —
+                    {{ 'reutilizado, sin recalcular' if evento.accion == 'reutilizado' else 'calculado y guardado' }}
+                </li>
+            {% endfor %}
+        </ol>
+    </details>
+
+    <section class="lesson-section">
+        <h2>Código que se ejecutó</h2>
+        <pre><code>{{ codigo }}</code></pre>
+    </section>
+
+    <a href="{{ url_for('aprender.mostrar_aprender', _anchor='laboratorio') }}" class="text-link">Volver al laboratorio</a>
+</section>
+{% endblock %}

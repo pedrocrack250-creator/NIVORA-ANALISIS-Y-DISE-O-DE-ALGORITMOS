@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="container lab-page">
+    <p class="eyebrow"><a href="{{ url_for('aprender.mostrar_aprender', _anchor='laboratorio') }}">Laboratorio</a> · Merge Sort</p>
+    <h1>Ejercicios disponibles</h1>
+    <p class="lesson-intro">
+        Esta lista se ordena en el servidor con <strong>Merge Sort</strong>, un algoritmo de
+        divide y vencerás: parte la lista por la mitad, ordena cada parte y las combina.
+    </p>
+
+    <nav class="lab-tabs" aria-label="Criterio de orden">
+        <span>Ordenar por:</span>
+        {% for clave, nombre in criterios %}
+            <a href="{{ url_for('laboratorio.ejercicios_ordenados', orden=clave) }}"
+               class="{{ 'is-active' if clave == criterio else '' }}">{{ nombre }}</a>
+        {% endfor %}
+    </nav>
+
+    <section class="recommendation-panel">
+        <p class="eyebrow">Merge Sort en ejecución</p>
+        <p><strong>{{ ejercicios|length }}</strong> ejercicios ·
+           <strong>{{ resultado.comparaciones }}</strong> comparaciones ·
+           <strong>{{ resultado.profundidad_maxima }}</strong> niveles de recursión ·
+           <strong>{{ resultado.fusiones|length }}</strong> fusiones</p>
+        <p>Complejidad: tiempo O(n log n), espacio auxiliar O(n).</p>
+    </section>
+
+    <div class="lesson-list">
+        {% for ejercicio in ejercicios %}
+            <div class="lesson-row">
+                <span class="lesson-number">{{ '%02d'|format(loop.index) }}</span>
+                <div class="lesson-row-copy">
+                    <h2>{{ ejercicio.titulo }}</h2>
+                    <p>{{ ejercicio.descripcion }}</p>
+                    <p class="exercise-meta">{{ ejercicio.unidad }} · ejercicio #{{ ejercicio.id_ejercicio }} · posición original {{ ejercicio.orden_original }}</p>
+                </div>
+                <span class="difficulty-badge difficulty-{{ ejercicio.dificultad }}">{{ ejercicio.dificultad|capitalize }}</span>
+            </div>
+        {% else %}
+            <p class="lesson-intro">Todavía no hay ejercicios disponibles.</p>
+        {% endfor %}
+    </div>
+
+    <details class="lab-trace">
+        <summary>Ver las {{ resultado.fusiones|length }} fusiones realizadas</summary>
+        <ol>
+            {% for fusion in resultado.fusiones %}
+                <li>Nivel {{ fusion.nivel }}:
+                    <code>[{{ fusion.izquierda|join(', ') }}]</code> +
+                    <code>[{{ fusion.derecha|join(', ') }}]</code> →
+                    <code>[{{ fusion.resultado|join(', ') }}]</code></li>
+            {% endfor %}
+        </ol>
+    </details>
+
+    <a href="{{ url_for('aprender.mostrar_aprender', _anchor='laboratorio') }}" class="text-link">Volver al laboratorio</a>
+</section>
+{% endblock %}

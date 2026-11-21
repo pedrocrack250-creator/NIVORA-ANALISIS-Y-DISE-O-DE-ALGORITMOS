@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% macro filas(algoritmos, inicio) %}
+    <div class="lesson-list">
+        {% for algoritmo in algoritmos %}
+            <div class="lesson-row">
+                <span class="lesson-number">{{ '%02d'|format(inicio + loop.index0) }}</span>
+                <div class="lesson-row-copy">
+                    <h2>{{ algoritmo.nombre }}</h2>
+                    <p>{{ algoritmo.descripcion }}</p>
+                    <p class="exercise-meta">{{ algoritmo.concepto }}</p>
+                </div>
+                {% if algoritmo.slug in ['kruskal', 'prim', 'union-find'] %}
+                    <a class="btn-continuar-sm" href="{{ url_for(algoritmo.endpoint, slug=algoritmo.slug) }}">Abrir</a>
+                {% else %}
+                    <a class="btn-continuar-sm" href="{{ url_for(algoritmo.endpoint) }}">Abrir</a>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+{% endmacro %}
+
+{% block content %}
+<section class="container lab-page">
+    <p class="eyebrow">Practicar · Laboratorio</p>
+    <h1>Laboratorio de algoritmos</h1>
+    <p class="lesson-intro">
+        Experimenta con algoritmos reales: observa cómo funcionan paso a paso
+        y comprueba por qué son eficientes.
+    </p>
+
+    <h2 class="lab-heading">Algoritmos interactivos</h2>
+    {{ filas(interactivos, 1) }}
+
+    {% if educativos %}
+        <h2 class="lab-heading">Contenido educativo</h2>
+        {{ filas(educativos, interactivos|length + 1) }}
+    {% endif %}
+
+    <a href="{{ url_for('practica.mostrar_practica') }}" class="text-link">Volver a Practicar</a>
+</section>
+{% endblock %}

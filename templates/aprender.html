@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% macro enlaces_laboratorio(algoritmos) %}
+    <ul class="lab-links">
+        {% for algoritmo in algoritmos %}
+            <li>
+                <a href="{{ url_for(algoritmo.endpoint, slug=algoritmo.slug) if algoritmo.endpoint == 'laboratorio.laboratorio_educativo' else url_for(algoritmo.endpoint) }}">
+                    <span class="lab-link-copy">
+                        <strong>{{ algoritmo.nombre }}</strong>
+                        <small>{{ algoritmo.concepto }}</small>
+                    </span>
+                    <span class="lab-link-arrow" aria-hidden="true">&rarr;</span>
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endmacro %}
+
+{% block content %}
+
+<div class="container">
+<section style="text-align: center; padding: 2rem 0 3rem;">
+    <p class="eyebrow">Unidades de aprendizaje</p>
+
+    <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">
+        Aprende Python paso a paso
+    </h1>
+
+    <p style="color: var(--text-sub); max-width: 650px; margin: 0 auto; line-height: 1.6;">
+        En esta sección encontrarás las unidades de aprendizaje de Nivora.
+        Comienza desde los fundamentos y avanza poco a poco hacia nuevos
+        conceptos de Python mediante explicaciones, ejemplos y actividades.
+    </p>
+</section>
+
+{% if mostrar_recomendacion %}
+<section class="recommendation-panel" data-recomendacion-inicial>
+    <p class="eyebrow">Tu recomendación</p>
+    <h2>{{ session['usuario']['recomendacion']['titulo'] }}</h2>
+    <p>{{ session['usuario']['recomendacion']['detalle'] }}</p>
+</section>
+{% endif %}
+
+<h2 id="ruta" style="font-weight: normal; margin-bottom: 1.5rem;">
+    Tus unidades de aprendizaje
+</h2>
+
+{% for ruta in rutas %}
+<div class="module-card {{ 'is-locked' if not ruta.desbloqueada else '' }}">
+    <div style="display: flex; align-items: center;">
+        <span class="module-num">{{ ruta.id }}</span>
+
+        <div class="module-info">
+            <h4>{{ ruta.nombre }}</h4>
+            <p>{{ ruta.descripcion }}</p>
+        </div>
+    </div>
+
+    <div class="module-status">
+        <span style="color: var(--text-sub);">
+            {{ ruta.progreso }}
+        </span>
+
+        {% if ruta.desbloqueada %}
+            <a href="{{ url_for('aprender.ruta', route_id=ruta.id) }}" class="btn-continuar-sm">Ver unidad</a>
+        {% else %}
+            <span class="route-locked">Bloqueada</span>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+
+<section id="laboratorio" class="lab-panel" aria-labelledby="laboratorio-titulo">
+    <div class="lab-panel-header">
+        <img src="{{ url_for('static', filename='img/nivora_practica.png') }}" alt="" class="lab-panel-mascot">
+        <div>
+            <p class="eyebrow">Explora más allá de la ruta</p>
+            <h2 id="laboratorio-titulo">Laboratorio de algoritmos</h2>
+            <p>
+                Observa paso a paso cómo funcionan algoritmos reales. Es un espacio
+                libre: no forma parte de los quizzes ni del progreso de las unidades.
+            </p>
+        </div>
+    </div>
+
+    <div class="lab-panel-groups">
+        <div>
+            <h3 class="lab-panel-heading">Algoritmos interactivos</h3>
+            {{ enlaces_laboratorio(laboratorio_interactivos) }}
+        </div>
+        {% if laboratorio_educativos %}
+        <div>
+            <h3 class="lab-panel-heading">Contenido educativo</h3>
+            {{ enlaces_laboratorio(laboratorio_educativos) }}
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+</div>
+{% endblock %}

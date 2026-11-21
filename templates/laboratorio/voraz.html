@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="container lab-page lesson-page">
+    <p class="eyebrow">Laboratorio · Algoritmo voraz</p>
+    <h1>¿Qué pregunta conviene repasar ahora?</h1>
+    <p class="lesson-intro">
+        Un algoritmo <strong>voraz</strong> toma en cada paso la mejor opción disponible <em>en ese momento</em>,
+        según una regla clara, y no la reconsidera. Nivora lo usa con las respuestas que ya registraste
+        para recomendarte la siguiente pregunta de los quizzes.
+    </p>
+
+    <section class="lesson-section">
+        <h2>La regla de prioridad</h2>
+        <ol>
+            <li><strong>Pendiente:</strong> solo compiten las preguntas que aún no respondiste bien.</li>
+            <li><strong>Refuerzo:</strong> primero la que acumula más respuestas incorrectas.</li>
+            <li><strong>Dificultad:</strong> si hay empate, la de menor dificultad.</li>
+            <li><strong>Posición:</strong> si todavía hay empate, la que va primero en su lección (y luego el menor ID).</li>
+        </ol>
+        <p>Has respondido bien <strong>{{ correctas }}</strong> de <strong>{{ total }}</strong> preguntas.</p>
+    </section>
+
+    {% if recomendacion %}
+        <section class="recommendation-panel">
+            <p class="eyebrow">Recomendación para ti</p>
+            <h2>{{ recomendacion.lesson_title }} · pregunta {{ recomendacion.numero }}</h2>
+            <p class="greedy-question">{{ recomendacion.pregunta }}</p>
+            <p class="exercise-meta">
+                Intentos: {{ recomendacion.intentos }} · Respuestas incorrectas: {{ recomendacion.errores }} ·
+                Dificultad: {{ recomendacion.dificultad|capitalize }}
+            </p>
+            <p><a class="btn-yellow" style="width: auto;" href="{{ url_for('aprender.leccion', lesson_id=recomendacion.lesson_id) }}">Ir al quiz de la lección</a></p>
+        </section>
+
+        <section class="lesson-section">
+            <h2>Cómo se decidió</h2>
+            <p>
+                Se evaluaron <strong>{{ candidatos|length }}</strong> preguntas pendientes con una sola pasada.
+                La prioridad es la tupla (−errores, dificultad, posición, id): gana la menor.
+            </p>
+            <div class="lab-scroll">
+                <table class="lab-table">
+                    <thead>
+                        <tr><th>Pregunta</th><th>Errores</th><th>Dificultad</th><th>Prioridad</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for candidato in candidatos %}
+                            <tr class="{{ 'is-reused' if candidato.elegida else '' }}">
+                                <td>{{ candidato.pregunta.lesson_title }} · pregunta {{ candidato.pregunta.numero }}</td>
+                                <td>{{ candidato.pregunta.errores }}</td>
+                                <td>{{ candidato.pregunta.dificultad|capitalize }}</td>
+                                <td><code>{{ candidato.prioridad|join(', ') }}</code>{% if candidato.elegida %} ← elegida{% endif %}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    {% else %}
+        <section class="recommendation-panel">
+            <p class="eyebrow">Recomendación para ti</p>
+            <p>No hay preguntas pendientes: respondiste bien todas las disponibles.</p>
+        </section>
+    {% endif %}
+
+    <section class="lesson-section">
+        <h2>Complejidad y límites</h2>
+        <p>
+            <strong>Tiempo O(n)</strong>: se filtran las pendientes y se compara cada una una sola vez.
+            <strong>Espacio O(n)</strong> por la lista de pendientes.
+        </p>
+        <p>
+            Es una <strong>heurística de selección local</strong>, no la ruta de aprendizaje óptima:
+            decide solo con lo que ve ahora, no planifica la secuencia completa, no considera cuánto tardas
+            ni qué temas dependen de otros. Por eso es una sugerencia, no una obligación.
+        </p>
+    </section>
+
+    <section class="lesson-section">
+        <h2>Código que se ejecutó</h2>
+        <pre><code>{{ codigo }}</code></pre>
+    </section>
+
+    <a href="{{ url_for('aprender.mostrar_aprender', _anchor='laboratorio') }}" class="text-link">Volver al laboratorio</a>
+</section>
+{% endblock %}
