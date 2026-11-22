@@ -41,6 +41,19 @@
 </section>
 {% endif %}
 
+{% if siguiente_pregunta %}
+<section class="recommendation-panel" data-siguiente-pregunta>
+    <p class="eyebrow">Siguiente pregunta recomendada</p>
+    <h2>{{ siguiente_pregunta.lesson_title }} · pregunta {{ siguiente_pregunta.numero }}</h2>
+    <p>{{ siguiente_pregunta.pregunta }}</p>
+    <p class="exercise-meta">{{ siguiente_pregunta.motivo }}</p>
+    <p>
+        <a href="{{ url_for('aprender.leccion', lesson_id=siguiente_pregunta.lesson_id) }}" class="btn-yellow" style="width: auto;">Ir a la lección</a>
+        <a href="{{ url_for('laboratorio.laboratorio_voraz') }}" class="text-link" style="margin-left: 0.75rem;">¿Cómo se eligió?</a>
+    </p>
+</section>
+{% endif %}
+
 <h2 id="ruta" style="font-weight: normal; margin-bottom: 1.5rem;">
     Tus unidades de aprendizaje
 </h2>

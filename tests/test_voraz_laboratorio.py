@@ -70,7 +70,10 @@ def test_aparece_en_el_indice_entre_los_interactivos(cliente):
     iniciar_sesion(cliente)
     html = cliente.get("/aprender").get_data(as_text=True)
     assert "/aprender/laboratorio/voraz" in html
-    assert html.index("Algoritmos interactivos") < html.index("/aprender/laboratorio/voraz") < html.index("Contenido educativo")
+    # Se busca el enlace dentro de la sección del laboratorio (el panel de recomendación
+    # de Aprender también enlaza a esta página, antes de esa sección).
+    inicio = html.index("Algoritmos interactivos")
+    assert inicio < html.index("/aprender/laboratorio/voraz", inicio) < html.index("Contenido educativo")
 
 
 def test_la_ruta_propia_no_la_captura_la_ruta_educativa(cliente):

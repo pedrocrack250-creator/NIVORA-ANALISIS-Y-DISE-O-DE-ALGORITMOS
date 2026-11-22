@@ -1,13 +1,24 @@
 from flask import Blueprint, render_template, redirect, url_for, session, request
 from models.ruta_model import RutaModel
+from repositories.exercise_repository import ExerciseRepository
 from repositories.progress_repository import ProgressRepository
-from services import progreso_service
+from services import progreso_service, recomendacion_service
 from services.algoritmos import catalogo
 from services.auth_service import AuthService
 
 aprender_bp = Blueprint('aprender', __name__)
 auth_service = AuthService()
 progress_repository = ProgressRepository()
+
+
+def _siguiente_pregunta(actividades):
+    """Algoritmo voraz sobre el progreso real del estudiante (ver recomendacion_service)."""
+    preguntas = ExerciseRepository().find_quiz_questions(
+        session['usuario'].get('id_persona'), progress_repository
+    )
+    return recomendacion_service.siguiente_pregunta(
+        preguntas, RutaModel.obtener_unidades(), RutaModel.obtener_lecciones(), actividades
+    )
 
 
 def _actividades():
@@ -23,16 +34,21 @@ def mostrar_aprender():
 
     actividades = _actividades()
     rutas = RutaModel.obtener_rutas(actividades)
+    # La recomendación inicial solo orienta antes de empezar: desaparece en
+    # cuanto existe un registro de cualquier lección (abrirla ya lo crea).
+    mostrar_recomendacion = (
+        bool(session['usuario'].get('recomendacion'))
+        and not progreso_service.inicio_alguna_leccion(actividades)
+    )
 
     return render_template(
         'aprender.html',
         rutas=rutas,
         usuario=session['usuario']['nombre'],
-        # La recomendación inicial solo orienta antes de empezar: desaparece en
-        # cuanto existe un registro de cualquier lección (abrirla ya lo crea).
-        mostrar_recomendacion=(
-            bool(session['usuario'].get('recomendacion'))
-            and not progreso_service.inicio_alguna_leccion(actividades)
+        mostrar_recomendacion=mostrar_recomendacion,
+        # Una vez iniciado el estudio, el algoritmo voraz propone la siguiente pregunta.
+        siguiente_pregunta=(
+            None if mostrar_recomendacion else _siguiente_pregunta(actividades)
         ),
         laboratorio_interactivos=catalogo.INTERACTIVOS,
         laboratorio_educativos=catalogo.EDUCATIVOS,
@@ -146,4 +162,4 @@ def completar_leccion(lesson_id):
     return render_template('leccion.html', resultado={
         'score': score, 'total': total, 'results': results, 'answers': answers,
         'completada': score == total, 'next_lesson': next_lesson
-    }, **_contexto_leccion(lesson))
+    }, siguiente_pregunta=_siguiente_pregunta(progreso), **_contexto_leccion(lesson))

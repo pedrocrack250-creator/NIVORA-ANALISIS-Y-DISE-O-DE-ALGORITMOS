@@ -137,6 +137,14 @@ frutas.append("pera")</code></pre>
         </form>
     </section>
 
+    {% if resultado and siguiente_pregunta %}
+        <p class="quiz-score" data-siguiente-pregunta>
+            Te recomendamos seguir con
+            <a class="text-link" style="text-decoration: underline;" href="{{ url_for('aprender.leccion', lesson_id=siguiente_pregunta.lesson_id) }}">{{ siguiente_pregunta.lesson_title }} · pregunta {{ siguiente_pregunta.numero }}</a>.
+            {{ siguiente_pregunta.motivo }}
+        </p>
+    {% endif %}
+
     {% if resultado %}
         <div class="quiz-actions">
             {% if not resultado.completada %}
