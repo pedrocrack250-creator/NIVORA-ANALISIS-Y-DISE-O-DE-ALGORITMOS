@@ -65,6 +65,27 @@
 
     {% endfor %}
 
+    {% if progreso.repaso %}
+    <h2 style="font-weight: normal; margin: 2.5rem 0 0.5rem;">
+        Lecciones para repasar
+    </h2>
+    <p style="color: var(--text-sub); margin-bottom: 1rem;">
+        Ordenadas con Merge Sort: arriba, la lección en la que más conviene volver a intentar el quiz.
+    </p>
+    <div class="lesson-list">
+        {% for leccion in progreso.repaso %}
+        <div class="lesson-row">
+            <span class="lesson-number">{{ '%02d'|format(loop.index) }}</span>
+            <div class="lesson-row-copy">
+                <h2>{{ leccion.titulo }}</h2>
+                <p>Acertaste {{ leccion.puntuacion }} de {{ leccion.total }} ({{ leccion.porcentaje }}%).</p>
+            </div>
+            <a class="btn-continuar-sm" href="{{ url_for('aprender.leccion', lesson_id=leccion.id) }}">Repasar</a>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
 </div>
 
 {% endblock %}

@@ -1,4 +1,5 @@
 from models.ruta_model import RutaModel
+from services import progreso_service
 
 
 class ProgresoModel:
@@ -11,7 +12,12 @@ class ProgresoModel:
         general_completadas = sum(ruta["completadas"] for ruta in rutas)
         general_total = sum(ruta["total"] for ruta in rutas)
 
+        repaso = progreso_service.lecciones_para_repasar(
+            RutaModel.obtener_lecciones(), actividades or {}
+        )
+
         return {
+            "repaso": repaso,
             "general": {
                 "completadas": general_completadas,
                 "total": general_total,

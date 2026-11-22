@@ -5,7 +5,11 @@ cuándo una unidad está terminada y qué unidades o lecciones están
 desbloqueadas. Trabaja con los registros del usuario (`PROGRESO_LECCION`,
 cargados en la sesión al iniciar sesión y actualizados en cada quiz), por lo
 que no depende de contadores mostrados en pantalla.
+
+El orden de las unidades y de las lecciones por repasar se calcula con el
+Merge Sort propio de ``services.algoritmos.merge_sort`` (no con ``sorted()``).
 """
+from services.algoritmos.merge_sort import merge_sort
 
 
 def actividad(actividades, lesson_id):
@@ -52,7 +56,8 @@ def estado_unidades(unidades, lecciones, actividades):
     """
     estados = []
     anterior_completa = True
-    for unidad in sorted(unidades, key=lambda item: item["numero"]):
+    # Merge Sort (estable, O(n log n)): el orden de las unidades define el desbloqueo.
+    for unidad in merge_sort(unidades, clave=lambda item: item["numero"]).elementos:
         propias = lecciones_de_unidad(lecciones, unidad["id_unidad"])
         completadas = sum(
             leccion_completada(actividades, lesson["id"]) for lesson in propias
@@ -91,6 +96,34 @@ def leccion_desbloqueada(unidades, lecciones, lesson, actividades):
         return True
     previa = propias[indice - 1]["id"]
     return leccion_completada(actividades, previa) or leccion_intentada(actividades, previa)
+
+
+def lecciones_para_repasar(lecciones, actividades):
+    """Lecciones intentadas que aún no se completan, de menor a mayor acierto.
+
+    Se ordenan con Merge Sort por (proporción de aciertos, posición en la ruta):
+    arriba queda la lección en la que el estudiante más necesita repasar. Al ser
+    estable, a igual acierto se conserva el orden de la ruta.
+    """
+    pendientes = []
+    for lesson in lecciones:
+        registro = actividad(actividades, lesson["id"])
+        if not registro.get("intentada") or registro.get("completada"):
+            continue
+        total = registro.get("total") or 0
+        puntuacion = registro.get("puntuacion") or 0
+        acierto = puntuacion / total if total else 0.0
+        pendientes.append({
+            "id": lesson["id"],
+            "titulo": lesson["titulo"],
+            "unidad": lesson["unidad"],
+            "numero": lesson["numero"],
+            "puntuacion": puntuacion,
+            "total": total,
+            "porcentaje": round(acierto * 100),
+            "acierto": acierto,
+        })
+    return merge_sort(pendientes, clave=lambda item: (item["acierto"], item["numero"])).elementos
 
 
 def siguiente_leccion(unidades, lecciones, lesson, actividades):
