@@ -367,9 +367,9 @@ def test_aprender_muestra_las_unidades_y_despues_el_laboratorio(cliente):
     assert html.index("Funciones") < html.index('id="laboratorio"')
     laboratorio = seccion_laboratorio(html)
     for nombre in ("Merge Sort", "Programación dinámica", "Backtracking", "Algoritmo voraz",
-                   "Kruskal", "Prim", "Union-Find"):
+                   "Análisis de eficiencia", "Kruskal", "Prim", "Union-Find"):
         assert nombre in laboratorio
-    assert len(enlaces(laboratorio)) == len(catalogo.INTERACTIVOS) + len(catalogo.EDUCATIVOS) == 7
+    assert len(enlaces(laboratorio)) == len(catalogo.INTERACTIVOS) + len(catalogo.EDUCATIVOS) == 8
 
 
 def test_todos_los_laboratorios_funcionan_desde_aprender(cliente):

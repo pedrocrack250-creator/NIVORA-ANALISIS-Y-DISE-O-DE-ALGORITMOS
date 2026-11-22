@@ -35,7 +35,7 @@
     <section class="recommendation-panel">
         <p class="eyebrow">Resultado</p>
         <h2>Con {{ r.n }} escalones hay {{ r.formas }} formas de subir</h2>
-        <p>Las dos soluciones se ejecutaron con el mismo valor y obtuvieron el mismo resultado.</p>
+        <p>Las tres soluciones se ejecutaron con el mismo valor y obtuvieron el mismo resultado.</p>
     </section>
 
     <div class="lab-scroll">
@@ -56,6 +56,12 @@
                     <td>{{ '%.2f'|format(r.tiempo_memoizado_ms) }} ms</td>
                     <td>tiempo O(n), espacio O(n)</td>
                 </tr>
+                <tr>
+                    <td>Tabulación (iterativa)</td>
+                    <td>0 · {{ r.operaciones_tabulado }} sumas</td>
+                    <td>{{ '%.2f'|format(r.tiempo_tabulado_ms) }} ms</td>
+                    <td>tiempo O(n), espacio O(n)</td>
+                </tr>
             </tbody>
         </table>
     </div>
@@ -64,6 +70,17 @@
         (unas {{ '%.1f'|format(r.factor_llamadas) }} veces menos) y reutilizó
         <strong>{{ r.reutilizaciones }}</strong> resultados ya guardados.
     </p>
+
+    <section class="lesson-section">
+        <h2>Memoización vs. tabulación</h2>
+        <p>
+            Ambas son programación dinámica y guardan cada subproblema una sola vez.
+            La <strong>memoización</strong> es descendente: parte de <code>formas({{ r.n }})</code>, baja recursivamente
+            y guarda lo que calcula. La <strong>tabulación</strong> es ascendente: llena una tabla desde los casos base
+            hasta {{ r.n }}, sin recursión y sin pila de llamadas. Tabla completa:
+        </p>
+        <p><code>{{ r.tabla|join(', ') }}</code></p>
+    </section>
 
     <section class="lesson-section">
         <h2>Estados guardados</h2>

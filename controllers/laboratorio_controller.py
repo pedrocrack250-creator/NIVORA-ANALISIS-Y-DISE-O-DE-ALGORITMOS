@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, redirect, request, url_for, sessio
 
 from repositories.exercise_repository import ExerciseRepository
 from repositories.progress_repository import ProgressRepository
-from services.algoritmos import catalogo
+from services.algoritmos import analisis, catalogo
 from services.algoritmos.backtracking import conflicto_reina, resolver_reinas
 from services.algoritmos.merge_sort import (
     ARREGLO_EJEMPLO,
@@ -16,6 +16,7 @@ from services.algoritmos.merge_sort import (
     rastro_merge_sort,
     validar_arreglo,
 )
+from services.algoritmos.quick_sort import _ordenar as _ordenar_quick, _particionar
 from services.algoritmos.voraz import pendientes, prioridad, recomendar_siguiente
 from services.algoritmos.programacion_dinamica import (
     N_MAXIMO,
@@ -144,6 +145,34 @@ def laboratorio_voraz():
         correctas=sum(1 for item in preguntas if item['estado'] == 'correcto'),
         codigo=inspect.getsource(prioridad) + '\n\n' + inspect.getsource(recomendar_siguiente),
     )
+
+
+@laboratorio_bp.route('/aprender/laboratorio/eficiencia')
+def laboratorio_eficiencia():
+    if 'usuario' not in session:
+        return redirect(url_for('auth.login'))
+
+    error = None
+    estado = 200
+    try:
+        n = analisis.validar_tamano(request.args.get('n', '64'))
+    except ValueError as exc:
+        error, n, estado = str(exc), 64, 400
+
+    return render_template(
+        'laboratorio/eficiencia.html',
+        n=n,
+        n_minimo=analisis.N_MINIMO,
+        n_maximo=analisis.N_MAXIMO,
+        error=error,
+        nombres_casos=analisis.CASOS,
+        casos=[analisis.medir_ordenamiento(n, caso) for caso in analisis.CASOS],
+        tabla=analisis.tabla_ordenamiento(),
+        recurrencias=analisis.verificar_recurrencias(),
+        maestro=analisis.ejemplos_maestro(),
+        espacio=analisis.medir_espacio(n),
+        codigo=inspect.getsource(_ordenar_quick) + '\n\n' + inspect.getsource(_particionar),
+    ), estado
 
 
 @laboratorio_bp.route('/aprender/laboratorio/<slug>')

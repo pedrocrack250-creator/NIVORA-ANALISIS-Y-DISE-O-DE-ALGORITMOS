@@ -8,13 +8,17 @@ escalones por vez. ¿De cuántas formas distintas se puede llegar arriba?
 El mismo subproblema aparece muchas veces (subproblemas superpuestos): para
 calcular formas(5) se calcula formas(3) dos veces, formas(2) tres veces, etc.
 
-Se implementan dos soluciones que se EJECUTAN de verdad:
+Se implementan tres soluciones que se EJECUTAN de verdad:
 
 * ``escaleras_recursivo``: recursión pura, recalcula todo.
     Tiempo O(2^n) (exactamente 2*formas(n) - 1 llamadas), espacio O(n) de pila.
 * ``escaleras_memoizado``: recursión + diccionario (memoización).
     Cada estado se calcula una sola vez y luego se reutiliza.
     Tiempo O(n) (2n - 1 llamadas), espacio O(n) (diccionario + pila).
+* ``escaleras_tabulado``: tabulación (programación dinámica ascendente).
+    Se llena una tabla desde los casos base hasta n, sin recursión.
+    Tiempo O(n) (n - 1 sumas), espacio O(n) (la tabla; O(1) si solo se
+    guardan los dos últimos valores).
 
 Este módulo es lógica pura: no depende de Flask ni de la base de datos.
 """
@@ -90,6 +94,23 @@ def escaleras_memoizado(n):
 
 
 @dataclass
+class ResultadoTabulado:
+    formas: int
+    operaciones: int  # sumas realizadas: una por cada estado desde 2 hasta n
+    tabla: list = field(default_factory=list)  # tabla[k] = formas(k)
+
+
+def escaleras_tabulado(n):
+    """Tabulación: se llena la tabla de abajo hacia arriba (sin recursión)."""
+    tabla = [1] * (n + 1)  # casos base: formas(0) = formas(1) = 1
+    operaciones = 0
+    for k in range(2, n + 1):
+        tabla[k] = tabla[k - 1] + tabla[k - 2]  # solo usa estados ya calculados
+        operaciones += 1
+    return ResultadoTabulado(formas=tabla[n], operaciones=operaciones, tabla=tabla)
+
+
+@dataclass
 class ComparacionEscaleras:
     n: int
     formas: int
@@ -100,6 +121,9 @@ class ComparacionEscaleras:
     tiempo_memoizado_ms: float
     estados: list  # [{"n", "valor", "reutilizaciones"}] de la tabla de memoización
     eventos: list
+    operaciones_tabulado: int = 0
+    tiempo_tabulado_ms: float = 0.0
+    tabla: list = field(default_factory=list)  # tabla de la solución tabulada
 
     @property
     def llamadas_evitadas(self):
@@ -122,7 +146,11 @@ def comparar_escaleras(n):
     memoizado = escaleras_memoizado(n)
     tiempo_memoizado = (perf_counter() - inicio) * 1000
 
-    if formas_recursivo != memoizado.formas:  # ambas deben coincidir siempre
+    inicio = perf_counter()
+    tabulado = escaleras_tabulado(n)
+    tiempo_tabulado = (perf_counter() - inicio) * 1000
+
+    if not formas_recursivo == memoizado.formas == tabulado.formas:  # deben coincidir siempre
         raise AssertionError("Las soluciones no coinciden")
 
     estados = [
@@ -143,4 +171,7 @@ def comparar_escaleras(n):
         tiempo_memoizado_ms=tiempo_memoizado,
         estados=estados,
         eventos=memoizado.eventos,
+        operaciones_tabulado=tabulado.operaciones,
+        tiempo_tabulado_ms=tiempo_tabulado,
+        tabla=tabulado.tabla,
     )

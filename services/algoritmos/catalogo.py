@@ -13,6 +13,9 @@ INTERACTIVOS = [
     {"slug": "voraz", "nombre": "Algoritmo voraz: siguiente ejercicio", "endpoint": "laboratorio.laboratorio_voraz",
      "descripcion": "Descubre cómo Nivora elige la pregunta que te conviene repasar con tu progreso real.",
      "concepto": "Selección local · criterio de prioridad · O(n)"},
+    {"slug": "eficiencia", "nombre": "Análisis de eficiencia: Merge Sort vs Quick Sort", "endpoint": "laboratorio.laboratorio_eficiencia",
+     "descripcion": "Mide las operaciones reales de ambos algoritmos y comprueba las recurrencias con el código de Nivora.",
+     "concepto": "Big O · recurrencias · mejor, promedio y peor caso"},
 ]
 
 GRAFO_EJEMPLO = {
